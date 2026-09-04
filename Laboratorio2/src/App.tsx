@@ -1,9 +1,8 @@
-import SearchBar from './components/search-bar/searchBar';
-import Logo from './components/logo/logo';
+import Header from '../src/components/header/Header';
 function App() {
     return (
         <>
-            <Logo />
+            <Header />
         </>
     );
 }

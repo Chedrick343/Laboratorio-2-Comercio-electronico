@@ -2,10 +2,40 @@ import { useState } from 'react';
 import styles from './Filters.module.css';
 
 const categories = [
-    'Rings',
-    'Necks',
-    'Earrings',
-    'Bracelets'
+    'Tecnología',
+    'Computadoras',
+    'Laptops',
+    'Periféricos',
+    'Mouse',
+    'Teclados',
+    'Monitores',
+    'Audio',
+    'Audífonos',
+    'Telefonía',
+    'Smartphones',
+    'Tablets',
+    'Dispositivos móviles',
+    'Componentes',
+    'Almacenamiento',
+    'Videojuegos',
+    'Consolas',
+    'Gaming',
+    'Tarjetas gráficas',
+    'Memoria RAM',
+    'Redes',
+    'Routers',
+    'Wearables',
+    'Smartwatches',
+    'Hogar inteligente',
+    'Asistentes de voz',
+    'Entretenimiento',
+    'Streaming',
+    'Accesorios',
+    'Cargadores',
+    'Controles',
+    'Oficina',
+    'Impresoras',
+    'Memorias'
 ];
 
 const MIN_PRICE = 0;

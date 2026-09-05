@@ -123,13 +123,37 @@
 ========================= */
 
 .categoriesList {
-
     display: flex;
     flex-direction: column;
 
     gap: 14px;
+
+    /* Mostrar aproximadamente 5 categorías */
+    max-height: 190px;
+
+    /* Scroll vertical */
+    overflow-y: auto;
+
+    padding-right: 8px;
 }
 
+.categoriesList::-webkit-scrollbar {
+    width: 6px;
+}
+
+.categoriesList::-webkit-scrollbar-track {
+    background: #eeeeee;
+    border-radius: 10px;
+}
+
+.categoriesList::-webkit-scrollbar-thumb {
+    background: #999999;
+    border-radius: 10px;
+}
+
+.categoriesList::-webkit-scrollbar-thumb:hover {
+    background: #777777;
+}
 
 .categoryOption {
 

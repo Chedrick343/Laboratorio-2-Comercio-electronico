@@ -1,5 +1,12 @@
 import { useState } from 'react';
 import styles from './Filters.module.css';
+import {
+    MIN_PRICE,
+    MAX_PRICE,
+    PRICE_STEP,
+    type ProductFilters
+} from '../../utils/Products';
+
 
 const categories = [
     'Tecnología',
@@ -38,33 +45,36 @@ const categories = [
     'Memorias'
 ];
 
-const MIN_PRICE = 0;
-const MAX_PRICE = 1_000_000;
-const PRICE_STEP = 10_000;
 
-export default function Filters() {
+interface FiltersProps {
+    filters: ProductFilters;
+    onFiltersChange: (filters: ProductFilters) => void;
+}
 
+
+export default function Filters({ filters, onFiltersChange }: FiltersProps) {
+
+    // Lo único que sigue siendo estado propio del componente:
+    // si el panel está abierto o cerrado
     const [filtersOpen, setFiltersOpen] = useState(false);
 
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-    const [minPrice, setMinPrice] = useState(MIN_PRICE);
-    const [maxPrice, setMaxPrice] = useState(MAX_PRICE);
+    const { selectedCategories, minPrice, maxPrice } = {
+        selectedCategories: filters.categories,
+        minPrice: filters.minPrice,
+        maxPrice: filters.maxPrice
+    };
 
 
     const handleCategoryChange = (category: string) => {
 
-        setSelectedCategories((previousCategories) => {
+        const nextCategories = selectedCategories.includes(category)
+            ? selectedCategories.filter((item) => item !== category)
+            : [...selectedCategories, category];
 
-            if (previousCategories.includes(category)) {
-
-                return previousCategories.filter(
-                    (item) => item !== category
-                );
-
-            }
-
-            return [...previousCategories, category];
+        onFiltersChange({
+            ...filters,
+            categories: nextCategories
         });
     };
 
@@ -73,7 +83,7 @@ export default function Filters() {
 
         // Evita que el mínimo sea mayor que el máximo
         if (value <= maxPrice) {
-            setMinPrice(value);
+            onFiltersChange({ ...filters, minPrice: value });
         }
 
     };
@@ -83,8 +93,20 @@ export default function Filters() {
 
         // Evita que el máximo sea menor que el mínimo
         if (value >= minPrice) {
-            setMaxPrice(value);
+            onFiltersChange({ ...filters, maxPrice: value });
         }
+
+    };
+
+
+    const handleClearFilters = () => {
+
+        onFiltersChange({
+            ...filters,
+            categories: [],
+            minPrice: MIN_PRICE,
+            maxPrice: MAX_PRICE
+        });
 
     };
 
@@ -100,6 +122,7 @@ export default function Filters() {
                 onClick={() => setFiltersOpen(!filtersOpen)}
             >
                 Filters
+                {selectedCategories.length > 0 && ` (${selectedCategories.length})`}
                 <span>
                     {filtersOpen ? '▲' : '▼'}
                 </span>
@@ -113,9 +136,6 @@ export default function Filters() {
                 <div className={styles.filtersPanel}>
 
 
-                    {/* =====================
-                        CATEGORIES
-                    ===================== */}
 
                     <div className={styles.filterSection}>
 
@@ -154,9 +174,6 @@ export default function Filters() {
                     </div>
 
 
-                    {/* =====================
-                        PRICE RANGE
-                    ===================== */}
 
                     <div className={styles.filterSection}>
 
@@ -192,9 +209,6 @@ export default function Filters() {
 
                         </div>
 
-
-                        {/* SLIDER MÍNIMO */}
-
                         <div className={styles.sliderContainer}>
 
                             <label className={styles.sliderLabel}>
@@ -216,9 +230,6 @@ export default function Filters() {
                             />
 
                         </div>
-
-
-                        {/* SLIDER MÁXIMO */}
 
                         <div className={styles.sliderContainer}>
 
@@ -242,9 +253,6 @@ export default function Filters() {
 
                         </div>
 
-
-                        {/* LÍMITES */}
-
                         <div className={styles.priceLimits}>
 
                             <span>
@@ -258,6 +266,14 @@ export default function Filters() {
                         </div>
 
                     </div>
+
+                    <button
+                        type="button"
+                        className={styles.clearButton}
+                        onClick={handleClearFilters}
+                    >
+                        Clear filters
+                    </button>
 
                 </div>
 

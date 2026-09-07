@@ -1,0 +1,47 @@
+import type { Product, ProductFilters } from './Products';
+
+const applicationId = import.meta.env.VITE_ALGOLIA_APPLICATION_ID;
+const searchApiKey = import.meta.env.VITE_ALGOLIA_SEARCH_API_KEY;
+const indexName = import.meta.env.VITE_ALGOLIA_INDEX_NAME;
+
+export async function searchProducts(
+    filters: ProductFilters,
+    signal?: AbortSignal
+): Promise<Product[]> {
+    if (!applicationId || !searchApiKey || !indexName) {
+        throw new Error(
+            'Faltan VITE_ALGOLIA_APPLICATION_ID, VITE_ALGOLIA_SEARCH_API_KEY o VITE_ALGOLIA_INDEX_NAME.'
+        );
+    }
+
+    const response = await fetch(
+        `https://${applicationId}-dsn.algolia.net/1/indexes/${encodeURIComponent(indexName)}/query`,
+        {
+            method: 'POST',
+            headers: {
+                'X-Algolia-Application-Id': applicationId,
+                'X-Algolia-API-Key': searchApiKey,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                query: filters.search,
+                facetFilters: filters.categories.length > 0
+                    ? [filters.categories.map((category) => `categories:${category}`)]
+                    : undefined,
+                numericFilters: [
+                    `price >= ${filters.minPrice}`,
+                    `price <= ${filters.maxPrice}`
+                ],
+                hitsPerPage: 1000
+            }),
+            signal
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(`Algolia respondió con HTTP ${response.status}.`);
+    }
+
+    const data: { hits: Product[] } = await response.json();
+    return data.hits;
+}

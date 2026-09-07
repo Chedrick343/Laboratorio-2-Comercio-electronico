@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
 
 import SearchBar from './components/search-bar/searchBar';
@@ -7,16 +7,10 @@ import ProductsGrid from './components/Products/Products';
 
 import {
     DEFAULT_FILTERS,
-    filterProducts,
     type Product,
     type ProductFilters
 } from './utils/Products';
-
-// Ajustá el nombre del archivo según tu carpeta src/Data
-import productsData from './Data/products (1).json';
-
-
-const allProducts = productsData as Product[];
+import { searchProducts } from './utils/algolia';
 
 
 export default function App() {
@@ -31,6 +25,9 @@ export default function App() {
        Se actualiza solo cuando se presiona Search */
 
     const [appliedFilters, setAppliedFilters] = useState<ProductFilters>(DEFAULT_FILTERS);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
 
     const handleSearch = () => {
@@ -43,10 +40,28 @@ export default function App() {
     };
 
 
-    const filteredProducts = useMemo(
-        () => filterProducts(allProducts, appliedFilters),
-        [appliedFilters]
-    );
+    useEffect(() => {
+        const controller = new AbortController();
+
+        setIsLoading(true);
+        setError(null);
+
+        searchProducts(appliedFilters, controller.signal)
+            .then(setProducts)
+            .catch((requestError: unknown) => {
+                if (requestError instanceof DOMException && requestError.name === 'AbortError') {
+                    return;
+                }
+
+                setError(requestError instanceof Error
+                    ? requestError.message
+                    : 'No se pudieron cargar los productos.');
+                setProducts([]);
+            })
+            .finally(() => setIsLoading(false));
+
+        return () => controller.abort();
+    }, [appliedFilters]);
 
 
     return (
@@ -66,7 +81,9 @@ export default function App() {
                 onFiltersChange={setDraftFilters}
             />
 
-            <ProductsGrid products={filteredProducts} />
+            {isLoading && <p>Cargando productos...</p>}
+            {error && <p role="alert">{error}</p>}
+            {!isLoading && !error && <ProductsGrid products={products} />}
 
         </main>
 

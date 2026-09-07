@@ -2,9 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './ProductsGrid.module.css';
 
 
-import productsData from '../../Data/products (1).json';
-
-
 /* =====================
    TIPOS
 ===================== */
@@ -26,9 +23,7 @@ export interface Product {
 
 
 interface ProductsGridProps {
-    // Si no se pasa nada, usa el JSON completo.
-    // Más adelante podés pasarle aquí la lista ya filtrada por <Filters />
-    products?: Product[];
+    products: Product[];
 }
 
 
@@ -56,10 +51,7 @@ const getMainCategory = (categories: string[]) =>
 
 export default function ProductsGrid({ products }: ProductsGridProps) {
 
-    const allProducts = useMemo(
-        () => products ?? (productsData as Product[]),
-        [products]
-    );
+    const allProducts = useMemo(() => products, [products]);
 
     const [currentPage, setCurrentPage] = useState(1);
 

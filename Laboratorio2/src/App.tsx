@@ -1,122 +1,91 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+import SearchBar from './components/search-bar/searchBar';
+import Filters from './components/filters/filters';
+import ProductsGrid from './components/Products/Products';
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+import {
+    DEFAULT_FILTERS,
+    type Product,
+    type ProductFilters
+} from './utils/Products';
+import { searchProducts } from './utils/algolia';
 
-      <div className="ticks"></div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+export default function App() {
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    /* BORRADOR: lo que el usuario está escribiendo / marcando ahora */
+
+    const [draftSearch, setDraftSearch] = useState('');
+    const [draftFilters, setDraftFilters] = useState<ProductFilters>(DEFAULT_FILTERS);
+
+
+    /* APLICADO: la consulta que realmente se ejecutó
+       Se actualiza solo cuando se presiona Search */
+
+    const [appliedFilters, setAppliedFilters] = useState<ProductFilters>(DEFAULT_FILTERS);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+
+    const handleSearch = () => {
+
+        setAppliedFilters({
+            ...draftFilters,
+            search: draftSearch
+        });
+
+    };
+
+
+    useEffect(() => {
+        const controller = new AbortController();
+
+        setIsLoading(true);
+        setError(null);
+
+        searchProducts(appliedFilters, controller.signal)
+            .then(setProducts)
+            .catch((requestError: unknown) => {
+                if (requestError instanceof DOMException && requestError.name === 'AbortError') {
+                    return;
+                }
+
+                setError(requestError instanceof Error
+                    ? requestError.message
+                    : 'No se pudieron cargar los productos.');
+                setProducts([]);
+            })
+            .finally(() => setIsLoading(false));
+
+        return () => controller.abort();
+    }, [appliedFilters]);
+
+
+    return (
+
+        <main className="app">
+
+            {/* Acá van tus componentes <Header /> y <Logo /> */}
+
+            <SearchBar
+                value={draftSearch}
+                onChange={setDraftSearch}
+                onSearch={handleSearch}
+            />
+
+            <Filters
+                filters={draftFilters}
+                onFiltersChange={setDraftFilters}
+            />
+
+            {isLoading && <p>Cargando productos...</p>}
+            {error && <p role="alert">{error}</p>}
+            {!isLoading && !error && <ProductsGrid products={products} />}
+
+        </main>
+
+    );
 }
-
-export default App

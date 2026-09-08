@@ -30,3 +30,5 @@ de productos.
 
 De esa forma se consiguió la cuadricula. El json fue utilizado para simular la conexión con algolia
 
+# Enlace del repositorio desplegado
+https://chedrick343.github.io/Laboratorio-2-Comercio-electronico/

@@ -1,9 +1,9 @@
 # Laboratorio-2-Comercio-electronico
 
 # 1. Decisiones de Diseño (UI)
-La decisión de usar colores grises viene de que se usarán como productos las joyas, anillos, brazaletes etc...
+La decisión de usar colores grises viene de que se quería una paleta de colores elegante.
 Estos colores generan un gran contraste con estos accesorios ya que en su mayoría son coloridos y los tonos que usamos realzan esos colores.
-Por ahora estamos utilizando elementos
+
 
 # 2. Experiencia de usuario (UX).
 Se ubicaron los filtros en un menú desplegable, para no sobrecargar la interfaz y si el usuario necesita aplicarlos entonces presiona y se despliegan los filtros.
